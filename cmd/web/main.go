@@ -13,46 +13,45 @@ import (
 
 const portNumber = ":8080"
 
-// This helps us to use app.(...) config.go 's properties
 var app config.AppConfig
-
 var session *scs.SessionManager
 
-// main is the main application function
+// main is the main function
 func main() {
-
-	//Turn this true when in production
+	// change this to true when in production
 	app.InProduction = false
 
-	//creating sessions
+	// set up the session
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
-	session.Cookie.Persist = true //the moment when someone closes the browser set to false
+	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
-	session.Cookie.Secure = app.InProduction //binding
+	session.Cookie.Secure = app.InProduction
 
 	app.Session = session
 
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("cannot create template cache")
 	}
-	app.TemplateCache = tc
 
-	app.UsaCache = false
+	app.TemplateCache = tc
+	app.UseCache = false
 
 	repo := handlers.NewRepo(&app)
 	handlers.NewHandlers(repo)
-	render.Newtamplate(&app)
 
-	fmt.Printf(fmt.Sprintf("Starting server at port %s", portNumber))
+	render.NewTemplates(&app)
+
+	fmt.Println(fmt.Sprintf("Staring application on port %s", portNumber))
 
 	srv := &http.Server{
 		Addr:    portNumber,
 		Handler: routes(&app),
 	}
+
 	err = srv.ListenAndServe()
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 }
