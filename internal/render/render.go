@@ -23,6 +23,10 @@ func NewTemplates(a *config.AppConfig) {
 
 func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
 
+	td.Flash = app.Session.PopString(r.Context(), "flash")
+	td.Warning = app.Session.PopString(r.Context(), "warning")
+	td.Error = app.Session.PopString(r.Context(), "error")
+
 	td.CSRFToken = nosurf.Token(r)
 
 	return td
@@ -30,6 +34,7 @@ func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateDa
 
 // RenderTemplate renders a template
 func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
+
 	var tc map[string]*template.Template
 
 	if app.UseCache {
